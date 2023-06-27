@@ -49,6 +49,12 @@ export const RECORDS_ON_REQUEST = 50;
 //Количество записей исторической таблицы возвращаемых на один запрос
 export const HISTORY_DATA_LIMIT = 50;
 
-console.log(`NODE_ENV: ${NODE_ENV}\nLOG_LEVEL: ${LOG_LEVEL}\nAPP_PORT: ${PORT}`);
+//Размер массива по заданному размеру куба
+export const CUBE_SIZE = Number(checkEnvironmentFor('CUBE_SIZE'));
 
+export const X_SIZE = CUBE_SIZE*3;
+export const Y_SIZE = CUBE_SIZE*4;
+
+console.log(`NODE_ENV: ${NODE_ENV}\nLOG_LEVEL: ${LOG_LEVEL}\nAPP_PORT: ${PORT}`);
+console.log(`CUBE_SIZE: ${CUBE_SIZE}x${CUBE_SIZE}x${CUBE_SIZE}\n`);
 
