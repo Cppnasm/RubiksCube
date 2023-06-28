@@ -29,7 +29,13 @@ export class MathService implements OnModuleInit {
         this.initCube();
         this.logger.verbose("\nCube initialized successfully\n");
         this.drawSweep(this.cube, false);
-        this.rotateR();
+        //this.rotateL("L");
+        //this.drawSweep(this.cube, false);
+        this.rotateU("U");
+        this.drawSweep(this.cube, false);
+        this.rotateL("L");
+        this.drawSweep(this.cube, false);
+        this.rotateR("RC");
         this.drawSweep(this.cube, false);
      }
 
@@ -60,14 +66,14 @@ export class MathService implements OnModuleInit {
             output = output.concat(filler); 
             result.push(output);
         }
-        //TOP
+        //UP
         for (let z = 0; z<CUBE_SIZE; z++){
             let output = filler;
             let y = CUBE_SIZE-1;
             for (let x = 0; x<CUBE_SIZE; x++){
                 output = addPosition
-                ? output.concat(createMatrixRawString(cube[x][y][z].top,cube[x][y][z].x,cube[x][y][z].y,cube[x][y][z].z))
-                : output.concat(cube[x][y][z].top);
+                ? output.concat(createMatrixRawString(cube[x][y][z].up,cube[x][y][z].x,cube[x][y][z].y,cube[x][y][z].z))
+                : output.concat(cube[x][y][z].up);
             }
             output = output.concat(filler);  
             result.push(output);
@@ -92,7 +98,7 @@ export class MathService implements OnModuleInit {
                 ? output.concat(createMatrixRawString(cube[x][y][z].front,cube[x][y][z].x,cube[x][y][z].y,cube[x][y][z].z))
                 : output.concat(cube[x][y][CUBE_SIZE-1].front);                
             }
-            result[(Y_SIZE/2)+y] = result[(Y_SIZE/2)+y].concat(output);
+            result[(Y_SIZE/2)+CUBE_SIZE-y-1] = result[(Y_SIZE/2)+CUBE_SIZE-y-1].concat(output);
         }
         //RIGHT       
         for (let z = CUBE_SIZE-1; z>=0; z--){
@@ -105,14 +111,14 @@ export class MathService implements OnModuleInit {
             }
             result[(Y_SIZE/2)+z] = result[(Y_SIZE/2)+z].concat(output);
         }
-        //BOTTOM
+        //DOWN
         for (let z = CUBE_SIZE-1; z>=0; z--){
             let output = filler;
             let y = 0;
             for (let x = 0; x<CUBE_SIZE; x++){
                 output = addPosition
-                ? output.concat(createMatrixRawString(cube[x][y][z].bot,cube[x][y][z].x,cube[x][y][z].y,cube[x][y][z].z))
-                : output.concat(cube[x][y][z].bot);
+                ? output.concat(createMatrixRawString(cube[x][y][z].down,cube[x][y][z].x,cube[x][y][z].y,cube[x][y][z].z))
+                : output.concat(cube[x][y][z].down);
             }
             output = output.concat(filler);  
             result.push(output);
@@ -126,20 +132,24 @@ export class MathService implements OnModuleInit {
     copyCubeToSide(constAxis: string, constAxisValue: number, cubeToSide: boolean){
         //if cubeToSide = true, then copy cube to side, else - side to cube
         let xStart: number = 0, yStart: number = 0, zStart: number = 0;
+        let xEnd: number = CUBE_SIZE, yEnd: number = CUBE_SIZE, zEnd: number = CUBE_SIZE;
    
         if (constAxis === "X" || constAxis === "x"){            
             xStart = constAxisValue;
+            xEnd = constAxisValue+1;
         } else if (constAxis === "Y" || constAxis === "y"){
             yStart = constAxisValue;
+            yEnd = constAxisValue+1;
         } else if (constAxis === "Z" || constAxis === "z"){
             zStart = constAxisValue;
+            zEnd = constAxisValue+1;
         } else {
             this.logger.warn(`Wrong input in copySide function: Axis: ${constAxis} with value ${constAxisValue}`);
             return;
-        }
-        for (let x = xStart; x<CUBE_SIZE; x++){
-            for(let y = yStart; y<CUBE_SIZE; y++) {
-                for(let z = zStart; z<CUBE_SIZE; z++) {
+        }        
+        for (let x = xStart; x<xEnd; x++){
+            for(let y = yStart; y<yEnd; y++) {
+                for(let z = zStart; z<zEnd; z++) {
                     if (constAxis === "X" || constAxis === "x"){
                         if(cubeToSide)
                         this.side[y][z] = this.cube[x][y][z];
@@ -173,21 +183,27 @@ export class MathService implements OnModuleInit {
             for (let y = 0; y<cube_size;y++){
                 switch(direction){
                     case "R":
+                    case "LC":
                         this.side[x][y].rotateR();
                         break;
-                    case "R'":
+                    case "RC":
+                    case "L":
                         this.side[x][y].rotateR_C();
                         break;
                     case "U":
+                    case "D":
                         this.side[x][y].rotateU();
                         break;
-                    case "U'":
+                    case "UC":
+                    case "DC":
                         this.side[x][y].rotateU_C();
                         break;
                     case "F":
+                    case "B":
                         this.side[x][y].rotateF();
                         break;
-                    case "F'":
+                    case "FC":
+                    case "BC":
                         this.side[x][y].rotateF_C();
                         break;                        
                     default:
@@ -199,151 +215,23 @@ export class MathService implements OnModuleInit {
         }
     }
 
-    rotateR(){
-        let x = CUBE_SIZE-1;
-        this.copyCubeToSide("X", x, true);
-        this.rotateSideBy90Degrees(this.side,CUBE_SIZE,true,"R");
-        this.copyCubeToSide("X", x, false);
+    rotateR(rotation: string){
+        this.copyCubeToSide("X", CUBE_SIZE-1, true);
+        this.rotateSideBy90Degrees(this.side,CUBE_SIZE,rotation === "R",rotation);
+        this.copyCubeToSide("X", CUBE_SIZE-1, false);
     }
-
-
-    rotate90(n: number){
-        let arr: string[][];
-        arr = [];
-        for (let x = 0; x < n; x++){
-            arr[x]=[];
-            for(let y = 0; y < n; y++){
-                arr[x][y] = `(${x},${y})`;
-            }
-        }
-
-        let output = "";        
-        for (let y = 0; y < n; y++){ 
-            let tempstr = "";           
-            for(let x = 0; x < n; x++){
-                tempstr = tempstr.concat(arr[x][y]);
-            }
-            output = tempstr + '\n' + output;
-        }
-        console.log(output);
-
-        //rotateClockwise(arr,n);
-        rotateCounterClockwise(arr,n);
-
-        output = ""; 
-        for (let y = 0; y < n; y++){ 
-            let tempstr = "";           
-            for(let x = 0; x < n; x++){
-                tempstr = tempstr.concat(arr[x][y]);
-            }
-            output = tempstr + '\n' + output;
-        }
-        console.log(output);
+    rotateL(rotation: string){
+        this.copyCubeToSide("X", 0, true);
+        this.rotateSideBy90Degrees(this.side,CUBE_SIZE,rotation === "L",rotation);
+        this.copyCubeToSide("X", 0, false);
     }
-
-   
-
-
-
-    // rotate90Clockwise(cubeSide:Square[][]):Square[][]{
-    //     let N = CUBE_SIZE-1;
-    //     for(let i = 0; i<N/2; i++){
-    //         for(let j = i; j<N-i-1; j++){
-    //             var buf = cubeSide[i][j];
-    //             cubeSide[i][j] = cubeSide[N - 1 - j][i];
-    //             cubeSide[N - 1 - j][i] = cubeSide[N - 1 - i][N - 1 - j];
-    //             cubeSide[N - 1 - i][N - 1 - j] = cubeSide[j][N - 1 - i];
-    //             cubeSide[j][N - 1 - i] = buf;
-    //         }
-    //     }
-    //     return cubeSide;
-    // }
-
-    // rotateConst(direction: string, rotate: string, axisConst: string, axisValue: number):void{
-    //     if (axisConst === "X" || axisConst === "x") {
-    //         let x = axisValue;
-    //         for (let y = 0; y < CUBE_SIZE; y++) {
-    //             for (let z = 0; z < CUBE_SIZE; z++){                
-    //                 this.cube[x][y][z] = (
-    //                 direction === rotate 
-    //                 ? this.rotateColorsRightClockwise(this.cube[x][y][z])
-    //                 : this.rotateColorsRightCounterClockwise(this.cube[x][y][z])
-    //                 );
-    //             }
-    //         }
-    //         return;
-    //     }   
-    //     if (axisConst === "Y" || axisConst === "y") {
-    //         let y = axisValue;
-    //         for (let x = 0; x < CUBE_SIZE; x++) {
-    //             for (let z = 0; z < CUBE_SIZE; z++){                
-    //                 this.cube[x][y][z] = (
-    //                 direction === rotate 
-    //                 ? this.rotateColorsTopClockwise(this.cube[x][y][z])
-    //                 : this.rotateColorsTopCounterClockwise(this.cube[x][y][z])
-    //                 );
-    //             }
-    //         }
-    //         return;
-    //     }  
-    //     if (axisConst === "Z" || axisConst === "z") {
-    //         let z = axisValue;
-    //         for (let x = 0; x < CUBE_SIZE; x++) {
-    //             for (let y = 0; y < CUBE_SIZE; y++){                
-    //                 this.cube[x][y][z] = (
-    //                 direction === rotate 
-    //                 ? this.rotateColorsFrontClockwise(this.cube[x][y][z])
-    //                 : this.rotateColorsFrontCounterClockwise(this.cube[x][y][z])
-    //                 );
-    //             }
-    //         }
-    //         return;
-    //     }
-    // }
-
-    // rotateF(direction: string){  
-    //     this.rotateConst(direction,"","Z",CUBE_SIZE-1); //Front   
-    //     direction === "" ? console.log(`F`) : console.log(`F'`);  
-    // }
-    // rotateB(direction: string){
-    //     this.rotateConst(direction,"_","Z",0); //Back
-    //     direction === "" ? console.log(`B`) : console.log(`B'`);          
-    // }
-    // rotateS(direction: string){        
-    //     let z = CUBE_SIZE-2;
-    //     for (let i = 0; i < z; i++){
-    //         this.rotateConst(direction,"","Z",i+1);//Standing
-    //         direction === "" ? console.log(`S: axis = ${i+1}`) : console.log(`S' axis = ${i+1}`);  
-    //     }                
-    // }
-    // rotateL(direction: string){
-    //     this.rotateConst(direction,"_","X",0); //Left
-    //     for (let y = 0; y<CUBE_SIZE-1;y++){
-    //         for(let z = 0; z<CUBE_SIZE-1;z++) {
-    //             this.side[y][z] = this.cube[0][y][z];      
-    //         }
-    //     }  
-    //     this.rotate90Clockwise(this.side);
-    //     for (let y = 0; y<CUBE_SIZE-1;y++){
-    //         for(let z = 0; z<CUBE_SIZE-1;z++) {
-    //             this.cube[0][y][z] = this.side[y][z];      
-    //         }
-    //     }        
-    //     direction === "" ? console.log(`L`) : console.log(`L'`); 
-    // }
-    // rotateR(direction: string){
-    //     this.rotateConst(direction,"","X",CUBE_SIZE-1); //Right
-    //     direction === "" ? console.log(`R`) : console.log(`R'`); 
-    // }
-
-
-        
-    rotateU(){
-        //Up
+    rotateU(rotation: string){
+        this.copyCubeToSide("Y", CUBE_SIZE-1, true);
+        this.rotateSideBy90Degrees(this.side,CUBE_SIZE,rotation === "U",rotation);
+        this.copyCubeToSide("Y", CUBE_SIZE-1, false);
     }
-    rotateU_(){
-        //Up'
-    }    
+       
+
     rotateD(){
         //Down
     }
@@ -384,7 +272,7 @@ export class MathService implements OnModuleInit {
     } 
     rotateUw(){
         //Top+center
-        this.rotateU();
+        //this.rotateU();
         this.rotateE_();
     }
     rotateDw(){
@@ -406,13 +294,13 @@ export class MathService implements OnModuleInit {
     } 
     rotateY(){
         //rotate Y (left)
-        this.rotateU();
+        //this.rotateU();
         this.rotateE_();
         this.rotateD_();
     }
     rotateY_(){
         //rotate Y (right)
-        this.rotateU_();
+        //this.rotateU_();
         this.rotateE();
         this.rotateD();
     } 

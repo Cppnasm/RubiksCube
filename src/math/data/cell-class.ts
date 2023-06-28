@@ -14,8 +14,8 @@ export class Cell implements ICell {
     z: number;
     left: string;
     right: string;
-    top: string;
-    bot: string;
+    up: string;
+    down: string;
     front: string;
     back: string;
 
@@ -27,25 +27,25 @@ export class Cell implements ICell {
         this.x = x;
         this.y = y;
         this.z = z;
-        this.top = "R";
+        this.up = "R";
         this.front = "Y";
         this.right = "B";
         this.left = "G";
         this.back = "W";
-        this.bot = "O";
+        this.down = "O";
     }
     rotateR():void{
-        let buf = this.top;
-        this.top = this.front;
-        this.front = this.bot;
-        this.bot = this.back;
+        let buf = this.up;
+        this.up = this.front;
+        this.front = this.down;
+        this.down = this.back;
         this.back = buf;
     }
     rotateR_C():void{
-        let buf = this.top;
-        this.top = this.back;
-        this.back = this.bot;
-        this.bot = this.front;
+        let buf = this.up;
+        this.up = this.back;
+        this.back = this.down;
+        this.down = this.front;
         this.front = buf;
     }
     rotateU():void{
@@ -63,17 +63,17 @@ export class Cell implements ICell {
         this.right = buf;
     }
     rotateF():void{
-        let buf = this.top;
-        this.top = this.left;
-        this.left = this.bot;
-        this.bot = this.right;
+        let buf = this.up;
+        this.up = this.left;
+        this.left = this.down;
+        this.down = this.right;
         this.right = buf;
     }
     rotateF_C():void{
-        let buf = this.top;
-        this.top = this.right;
-        this.right = this.bot;
-        this.bot = this.left;
+        let buf = this.up;
+        this.up = this.right;
+        this.right = this.down;
+        this.down = this.left;
         this.left = buf;
     }
 }
